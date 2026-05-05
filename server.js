@@ -10,7 +10,7 @@ const multer = require("multer");
 const { PDFDocument } = require("pdf-lib");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 function sanitizeFilename(str) {
     return str.replace(/[^a-z0-9]/gi, "_").toLowerCase();
@@ -39,10 +39,10 @@ app.use(
 
 // Database connection
 const db = mysql.createConnection({
-    host: "localhost",
+    host: "mysql.railway.internal",
     user: "root",
-    password: "",
-    database: "login_app",
+    password: "rUishyxeKEQTIjRCjmWlpqIvkglIRtFb",
+    database: "railway",
 });
 
 db.connect((err) => {
