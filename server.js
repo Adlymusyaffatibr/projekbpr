@@ -10,7 +10,7 @@ const multer = require("multer");
 const { PDFDocument } = require("pdf-lib");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 function sanitizeFilename(str) {
     return str.replace(/[^a-z0-9]/gi, "_").toLowerCase();
@@ -39,10 +39,10 @@ app.use(
 
 // Database connection
 const db = mysql.createConnection({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    password: process.env.DB_PASSWORD,
-    database: process.env.DB_NAME,
+    host: "localhost",
+    user: "root",
+    password: "",
+    database: "login_app",
 });
 
 db.connect((err) => {
@@ -89,11 +89,7 @@ app.post("/api/login", async(req, res) => {
 
         const token = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none",
-        });
+        res.cookie("token", token, { httpOnly: true });
 
         res.json({
             success: true,
@@ -411,7 +407,7 @@ app.post("/api/laporan/with-pdf", authenticateToken, upload.single("pdf"), async
     try {
         const finalStatus = "Berlaku"; // <-- status dipaksa "Berlaku"
         await db.promise().execute(
-            "INSERT INTO laporan (tahun, bulan, nama, tgl, status, uu, sop, perihal, file_pdf, expiry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [tahun, bulan, nama, tgl, finalStatus, uu, sop, perihal, file_pdf, expiry_date], // <-- pakai finalStatus
+            "INSERT INTO laporan (tahun, bulan, nama, tgl, status, uu, sop, perihal, file_pdf, expiry_date) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)", [tahun, bulan, nama, tgl, finalStatus, uu, sop, perihal, file_pdf, expiry_date] // <-- pakai finalStatus
         );
         res.json({ success: true });
     } catch (err) {
