@@ -1,0 +1,731 @@
+<!DOCTYPE html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>SI-PIPKU - Dashboard User (Mobile Fleksibel)</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #6a5cff, #8b3fff);
+            min-height: 100vh;
+            padding: 20px 16px;
+        }
+        
+        .dashboard-container {
+            max-width: 1300px;
+            margin: 0 auto;
+            display: flex;
+            gap: 24px;
+            flex-wrap: wrap;
+        }
+        
+        .search-panel {
+            flex: 1;
+            min-width: 280px;
+            background: white;
+            border-radius: 28px;
+            padding: 24px 20px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            border: 1px solid #000;
+        }
+        
+        .result-panel {
+            flex: 2;
+            min-width: 280px;
+            background: white;
+            border-radius: 28px;
+            padding: 20px;
+            box-shadow: 0 20px 35px -10px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            border: 1px solid #000;
+            max-height: 85vh;
+            overflow-y: auto;
+        }
+        
+        .hasil-tabel-container {
+            width: 100%;
+            max-height: 320px;
+            overflow-x: auto;
+            overflow-y: auto;
+            border: 1px solid #e5e7eb;
+            border-radius: 20px;
+            background: white;
+            -webkit-overflow-scrolling: touch;
+        }
+        
+        .tabel-laporan {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+        }
+        
+        .tabel-laporan th,
+        .tabel-laporan td {
+            border: 1px solid #ddd;
+            padding: 12px 10px;
+            text-align: left;
+            vertical-align: middle;
+            word-break: break-word;
+            white-space: normal;
+        }
+        
+        .tabel-laporan td:last-child,
+        .tabel-laporan th:last-child {
+            white-space: nowrap;
+        }
+        
+        .tabel-laporan th {
+            background-color: #f3f4f6;
+            font-weight: 700;
+            color: #1f2937;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        
+        .btn-preview-table {
+            background: #10b981;
+            color: white;
+            border: none;
+            padding: 8px 14px;
+            border-radius: 40px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .btn-preview-table:active {
+            transform: scale(0.96);
+        }
+        
+        .btn-preview-table.disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        
+        .preview-area {
+            background: #f9f9ff;
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid #edeef5;
+            flex-shrink: 0;
+        }
+        
+        .preview-header {
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #1e1e2f;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .btn-open-newtab {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            padding: 6px 14px;
+            border-radius: 40px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: 0.2s;
+        }
+        
+        .btn-open-newtab:active {
+            transform: scale(0.96);
+        }
+        
+        .pdf-viewer {
+            width: 100%;
+            height: 500px;
+            border: 1px solid #ddd;
+            border-radius: 16px;
+            background: #f0f2f5;
+        }
+        
+        .preview-placeholder {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            background: #f9f9ff;
+            border-radius: 18px;
+            padding: 40px 20px;
+            min-height: 300px;
+        }
+        
+        .preview-placeholder img {
+            width: 200px;
+            max-width: 100%;
+            height: auto;
+            margin-bottom: 24px;
+            opacity: 0.8;
+        }
+        
+        h2 {
+            font-size: 1.6rem;
+            margin-bottom: 8px;
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .subhead {
+            color: #5b5b7a;
+            border-left: 4px solid #8b3fff;
+            padding-left: 12px;
+            margin-bottom: 28px;
+            font-size: 0.85rem;
+        }
+        
+        .form-group {
+            margin-bottom: 22px;
+        }
+        
+        label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+            margin-bottom: 8px;
+            color: #2d2d44;
+            font-size: 0.85rem;
+        }
+        
+        input,
+        select {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            transition: 0.2s;
+            background: white;
+            -webkit-appearance: none;
+        }
+        
+        button {
+            background: #6a5cff;
+            color: white;
+            border: none;
+            padding: 14px 20px;
+            border-radius: 60px;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            font-size: 1rem;
+            transition: 0.2s;
+            margin-top: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        
+        button:active {
+            transform: scale(0.97);
+        }
+        
+        .empty-results {
+            color: #6b7280;
+            text-align: center;
+            padding: 30px;
+            font-size: 0.9rem;
+        }
+        
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            max-width: 1300px;
+            margin-left: auto;
+            margin-right: auto;
+            gap: 15px;
+        }
+        
+        .logo-title {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .user-greeting {
+            position: relative;
+            font-size: 0.9rem;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 8px 16px;
+            border-radius: 60px;
+            color: white;
+            backdrop-filter: blur(4px);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        
+        .dropdown-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-top: 8px;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2);
+            min-width: 140px;
+            z-index: 100;
+            display: none;
+            overflow: hidden;
+        }
+        
+        .dropdown-menu button {
+            background: white;
+            color: #1e1e2f;
+            border: none;
+            padding: 12px 16px;
+            width: 100%;
+            text-align: left;
+            border-radius: 0;
+            margin: 0;
+            font-weight: normal;
+        }
+        
+        .dropdown-menu button:hover {
+            background: #f3f4f6;
+            color: #ef4444;
+        }
+        
+        .dropdown-menu.show {
+            display: block;
+        }
+        
+        .status-badge {
+            background: #e9ecef;
+            padding: 4px 12px;
+            border-radius: 50px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
+        
+        @media (max-width: 800px) {
+            body {
+                padding: 16px 12px;
+            }
+            .dashboard-container {
+                flex-direction: column;
+                gap: 18px;
+            }
+            .search-panel,
+            .result-panel {
+                min-width: auto;
+                padding: 20px;
+            }
+            .result-panel {
+                max-height: 80vh;
+            }
+            .pdf-viewer {
+                height: 55vh;
+                min-height: 320px;
+            }
+            .hasil-tabel-container {
+                max-height: 280px;
+            }
+            .preview-placeholder img {
+                width: 150px;
+            }
+            button {
+                padding: 12px 16px;
+            }
+            .user-greeting {
+                font-size: 0.8rem;
+                padding: 4px 12px;
+            }
+            .tabel-laporan th,
+            .tabel-laporan td {
+                padding: 8px 6px;
+                font-size: 0.75rem;
+            }
+            .btn-preview-table {
+                padding: 6px 10px;
+                font-size: 0.7rem;
+            }
+            .btn-open-newtab {
+                font-size: 0.65rem;
+                padding: 5px 12px;
+            }
+        }
+        
+        @media (max-width: 560px) {
+            .header-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .logo-title h2 {
+                font-size: 1.4rem;
+            }
+            .preview-placeholder {
+                padding: 24px 16px;
+                min-height: 260px;
+            }
+            .preview-placeholder img {
+                width: 120px;
+                margin-bottom: 16px;
+            }
+            .pdf-viewer {
+                height: 50vh;
+                min-height: 280px;
+            }
+            .form-group input,
+            .form-group select {
+                padding: 12px 14px;
+            }
+        }
+        
+        @media (max-width: 400px) {
+            .preview-placeholder img {
+                width: 100px;
+            }
+            .pdf-viewer {
+                height: 45vh;
+                min-height: 240px;
+            }
+        }
+        
+        button,
+        .btn-preview-table,
+        select,
+        input,
+        .btn-open-newtab {
+            touch-action: manipulation;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+</head>
+
+<body>
+    <div style="max-width: 1300px; margin: 0 auto;">
+        <div class="header-top">
+            <div class="logo-title">
+                <h2 style="margin:0;"><i class="fas fa-search"></i> Cari Ketentuan</h2>
+            </div>
+            <div class="user-greeting" id="userGreeting">
+                <span><i class="fas fa-user-circle"></i> Memuat...</span>
+                <i class="fas fa-chevron-down" style="font-size: 0.7rem;"></i>
+                <div class="dropdown-menu" id="dropdownMenu">
+                    <button id="logoutBtnDropdown"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                </div>
+            </div>
+        </div>
+        <div class="dashboard-container">
+            <div class="search-panel">
+                <h2 style="color:#1e1e2f;"><i class="fas fa-filter"></i> Filter Ketentuan</h2>
+                <div class="subhead">Masukkan tanggal, divisi, keputusan, perihal (opsional), dan masa berlaku ketentuan (opsional)</div>
+                <div class="form-group">
+                    <label><i class="fas fa-calendar"></i> Tanggal Ketentuan</label>
+                    <input type="date" id="searchTgl" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> Divisi</label>
+                    <select id="searchDivisi" required>
+                        <option value="">-- Pilih Divisi --</option>
+                        <option value="01 bisnis">01 bisnis</option>
+                        <option value="02 operasional">02 operasional</option>
+                        <option value="03 legal">03 legal</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-gavel"></i> Keputusan</label>
+                    <select id="searchKeputusan" required>
+                        <option value="">-- Pilih Keputusan --</option>
+                        <option value="01 sk">01 sk (Surat Keputusan)</option>
+                        <option value="02 im">02 im (Internal Memorendum)</option>
+                        <option value="03 sop">03 sop (Sistem Operasional Prosedur)</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-tag"></i> Perihal (opsional)</label>
+                    <input type="text" id="searchPerihal" placeholder="Masukkan perihal (bisa sebagian)">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-hourglass-half"></i> Masa Berlaku Ketentuan (opsional)</label>
+                    <input type="date" id="searchExpiry">
+                    <small style="color:#666;">Filter berdasarkan masa berlaku ketentuan</small>
+                </div>
+                <button id="btnCari"><i class="fas fa-search"></i> Cari Ketentuan</button>
+            </div>
+
+            <div class="result-panel">
+                <div>
+                    <h4 style="margin-bottom: 12px; color: #1e1e2f;"><i class="fas fa-list"></i> Hasil Pencarian</h4>
+                    <div class="hasil-tabel-container">
+                        <div id="tabelHasilContainer">
+                            <div class="empty-results"><i class="fas fa-info-circle"></i> Gunakan form di sebelah kiri untuk mencari ketentuan.</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="preview-area">
+                    <div class="preview-header">
+                        <span><i class="fas fa-eye"></i> Preview PDF</span>
+                        <button id="btnOpenNewTab" class="btn-open-newtab" style="display: none;"><i class="fas fa-external-link-alt"></i> Buka di Tab Baru</button>
+                    </div>
+                    <div id="previewContainer">
+                        <div class="preview-placeholder">
+                            <img src="images/download.png" alt="PDF Icon" onerror="this.src='https://via.placeholder.com/200?text=PDF'">
+                            <p style="margin-top: 16px; font-weight: 500; color: #4b5563;">Klik tombol "Preview" pada tabel untuk melihat isi ketentuan PDF.<br>Untuk kenyamanan, buka di tab baru.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPdfUrl = null;
+
+        function showMessage(msg, isError = false) {
+            const notif = document.createElement('div');
+            notif.innerText = msg;
+            notif.style.position = 'fixed';
+            notif.style.bottom = '20px';
+            notif.style.right = '20px';
+            notif.style.backgroundColor = isError ? '#ef4444' : '#10b981';
+            notif.style.color = 'white';
+            notif.style.padding = '10px 20px';
+            notif.style.borderRadius = '40px';
+            notif.style.zIndex = '9999';
+            notif.style.fontSize = '0.9rem';
+            notif.style.boxShadow = '0 4px 12px rgba(0,0,0,0.2)';
+            document.body.appendChild(notif);
+            setTimeout(() => notif.remove(), 3000);
+        }
+
+        function escapeHtml(str) {
+            if (!str) return "";
+            return str.replace(/[&<>]/g, function(m) {
+                if (m === '&') return '&amp;';
+                if (m === '<') return '&lt;';
+                if (m === '>') return '&gt;';
+                return m;
+            });
+        }
+
+        let semuaLaporan = [];
+
+        async function loadSemuaLaporan() {
+            try {
+                const res = await fetch('/api/laporan', {
+                    credentials: 'include'
+                });
+                if (!res.ok) {
+                    if (res.status === 401) window.location.href = '/';
+                    throw new Error('Gagal mengambil data ketentuan');
+                }
+                const data = await res.json();
+                semuaLaporan = data;
+                return semuaLaporan;
+            } catch (err) {
+                console.error(err);
+                showMessage('Gagal memuat data ketentuan', true);
+                return [];
+            }
+        }
+
+        function filterLaporan(tanggal, divisi, keputusan, perihal, expiry) {
+            if (!semuaLaporan.length) return [];
+            return semuaLaporan.filter(lap => {
+                if (tanggal && lap.tgl && lap.tgl.slice(0, 10) !== tanggal) return false;
+                if (divisi && lap.uu !== divisi) return false;
+                if (keputusan && lap.sop !== keputusan) return false;
+                if (perihal && perihal.trim() !== '') {
+                    const perihalLap = (lap.perihal || '').toLowerCase();
+                    const keyword = perihal.toLowerCase();
+                    if (!perihalLap.includes(keyword)) return false;
+                }
+                if (expiry) {
+                    const lapExpiry = lap.expiry_date ? lap.expiry_date.slice(0, 10) : '';
+                    if (lapExpiry !== expiry) return false;
+                }
+                return true;
+            });
+        }
+
+        function renderTabel(hasilLaporan) {
+            const container = document.getElementById('tabelHasilContainer');
+            if (!hasilLaporan.length) {
+                container.innerHTML = '<div class="empty-results"><i class="fas fa-exclamation-triangle"></i> Tidak ada ketentuan yang sesuai dengan filter.</div>';
+                return;
+            }
+
+            let html = `
+                <table class="tabel-laporan">
+                    <thead>
+                        <tr><th>Divisi</th><th>Keputusan</th><th>Perihal</th><th>Tanggal</th><th>Masa Berlaku</th><th>Status</th><th>Aksi</th></tr>
+                    </thead>
+                    <tbody>
+            `;
+            hasilLaporan.forEach(lap => {
+                const divisi = lap.uu || '-';
+                const keputusan = lap.sop || '-';
+                const perihal = lap.perihal || '-';
+                const tgl = lap.tgl ? lap.tgl.slice(0, 10) : '-';
+                const expiry = lap.expiry_date ? lap.expiry_date.slice(0, 10) : '-';
+                const status = lap.status || 'Draft';
+                const pdfFile = lap.file_pdf;
+                const pdfUrl = pdfFile ? `/api/download-pdf/${encodeURIComponent(pdfFile)}` : null;
+                const previewDisabled = !pdfFile ? 'disabled' : '';
+                const previewClass = !pdfFile ? 'btn-preview-table disabled' : 'btn-preview-table';
+                html += `
+                    <tr>
+                        <td>${escapeHtml(divisi)}</td>
+                        <td>${escapeHtml(keputusan)}</td>
+                        <td>${escapeHtml(perihal)}</td>
+                        <td>${escapeHtml(tgl)}</td>
+                        <td>${escapeHtml(expiry)}</td>
+                        <td><span class="status-badge">${escapeHtml(status)}</span></td>
+                        <td><button class="${previewClass}" data-pdf-url="${pdfUrl || ''}" ${previewDisabled}><i class="fas fa-eye"></i> PDF</button></td>
+                    </tr>
+                `;
+            });
+            html += `</tbody></table>`;
+            container.innerHTML = html;
+
+            document.querySelectorAll('.btn-preview-table:not(.disabled)').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const url = btn.getAttribute('data-pdf-url');
+                    if (url) {
+                        currentPdfUrl = url;
+                        tampilkanPreviewPDF(url);
+                        const openBtn = document.getElementById('btnOpenNewTab');
+                        if (openBtn) openBtn.style.display = 'inline-flex';
+                    } else {
+                        showMessage('File PDF tidak tersedia', true);
+                    }
+                });
+            });
+        }
+
+        function tampilkanPreviewPDF(pdfUrl) {
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = `<iframe src="${pdfUrl}" class="pdf-viewer" frameborder="0" title="Preview PDF"></iframe>`;
+        }
+
+        function resetPreview() {
+            const previewContainer = document.getElementById('previewContainer');
+            previewContainer.innerHTML = `
+                <div class="preview-placeholder">
+                    <img src="images/download.png" alt="PDF Icon" onerror="this.src='https://via.placeholder.com/200?text=PDF'">
+                    <p style="margin-top: 16px; font-weight: 500; color: #4b5563;">Klik tombol "Preview" pada tabel untuk melihat isi ketentuan PDF.<br>Untuk kenyamanan, buka di tab baru.</p>
+                </div>
+            `;
+            const openBtn = document.getElementById('btnOpenNewTab');
+            if (openBtn) openBtn.style.display = 'none';
+            currentPdfUrl = null;
+        }
+
+        async function cariLaporan() {
+            const tgl = document.getElementById('searchTgl').value;
+            const divisi = document.getElementById('searchDivisi').value;
+            const keputusan = document.getElementById('searchKeputusan').value;
+            const perihal = document.getElementById('searchPerihal').value;
+            const expiry = document.getElementById('searchExpiry').value;
+
+            if (!tgl || !divisi || !keputusan) {
+                showMessage('Tanggal, Divisi, dan Keputusan harus diisi!', true);
+                return;
+            }
+
+            const tabelContainer = document.getElementById('tabelHasilContainer');
+            tabelContainer.innerHTML = '<div class="empty-results"><i class="fas fa-spinner fa-pulse"></i> Mencari...</div>';
+            resetPreview();
+
+            if (semuaLaporan.length === 0) {
+                await loadSemuaLaporan();
+            }
+
+            const hasil = filterLaporan(tgl, divisi, keputusan, perihal, expiry);
+            renderTabel(hasil);
+            if (hasil.length === 0) {
+                showMessage('Tidak ditemukan ketentuan yang cocok', true);
+            } else {
+                showMessage(`Ditemukan ${hasil.length} ketentuan. Klik Preview untuk melihat PDF.`);
+            }
+        }
+
+        async function logout() {
+            await fetch('/api/logout', {
+                method: 'POST',
+                credentials: 'include'
+            });
+            window.location.href = '/';
+        }
+
+        async function checkAuthAndUser() {
+            try {
+                const res = await fetch('/api/check-auth', {
+                    credentials: 'include'
+                });
+                if (!res.ok) throw new Error();
+                const data = await res.json();
+                const userName = data.user && data.user.username ? data.user.username : 'User';
+                const userSpan = document.querySelector('#userGreeting span');
+                if (userSpan) userSpan.innerHTML = `<i class="fas fa-user-circle"></i> Halo, ${userName}`;
+                await loadSemuaLaporan();
+            } catch (err) {
+                window.location.href = '/';
+            }
+        }
+
+        // Dropdown toggle
+        const userGreeting = document.getElementById('userGreeting');
+        const dropdownMenu = document.getElementById('dropdownMenu');
+        userGreeting.addEventListener('click', (e) => {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle('show');
+        });
+        document.addEventListener('click', () => {
+            dropdownMenu.classList.remove('show');
+        });
+        document.getElementById('logoutBtnDropdown').addEventListener('click', logout);
+
+        document.getElementById('btnOpenNewTab').addEventListener('click', () => {
+            if (currentPdfUrl) {
+                window.open(currentPdfUrl, '_blank');
+            } else {
+                showMessage('Tidak ada PDF yang sedang ditampilkan', true);
+            }
+        });
+        document.getElementById('btnCari').addEventListener('click', cariLaporan);
+        checkAuthAndUser();
+    </script>
+</body>
+
+</html>

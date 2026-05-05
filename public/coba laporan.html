@@ -1,0 +1,327 @@
+<!doctype html>
+<html lang="id">
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Laporan BPR PT. BPR MITRA PATI MANDIRI</title>
+    <style>
+        body {
+            font-family: Arial;
+            padding: 20px;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #5f7cff, #7b3fe4);
+            background-attachment: fixed;
+        }
+        
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 10px;
+        }
+        
+        th,
+        td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        
+        th {
+            background: #ddd;
+        }
+        
+        .sudah {
+            background-color: rgba(52, 211, 153, 0.25);
+        }
+        
+        button {
+            margin: 2px;
+        }
+        
+        label {
+            margin-right: 5px;
+        }
+        
+        @media print {
+            body {
+                padding: 0;
+                margin: 0;
+            }
+            button,
+            select,
+            label {
+                display: none !important;
+            }
+            table {
+                width: 100% !important;
+                border-collapse: collapse !important;
+            }
+            th,
+            td {
+                border: 1px solid black !important;
+                padding: 6px !important;
+            }
+            th {
+                background-color: #ddd !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            tr.sudah {
+                background-color: yellow !important;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            @page {
+                margin: 20mm;
+            }
+            .print-header {
+                display: block;
+                text-align: center;
+                font-weight: bold;
+                font-size: 18pt;
+                margin-bottom: 10px;
+            }
+        }
+        
+        .print-header {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- LOGOUT -->
+    <div style="position: absolute; top: 20px; right: 20px">
+        <button onclick="logout()" style="padding: 8px 14px; background: linear-gradient(135deg, #5f7cff, #7b3fe4); color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: bold">Logout</button>
+    </div>
+
+    <div class="print-header">
+        Laporan Bulanan PT. BPR MITRA PATI MANDIRI<br /> PT. BPR MITRA PATI MANDIRI<br /> Periode: <span id="printPeriode"></span>
+    </div>
+
+    <h1 style="text-align: center; margin-bottom: 10px">Laporan Bulanan<br />PT. BPR Mitra Daya Mandiri</h1>
+
+    <!-- Filter -->
+    <label>Tahun:</label>
+    <select id="tahunFilter" onchange="loadData()"></select>
+
+    <label>Bulan:</label>
+    <select id="bulanFilter" onchange="loadData()">
+      <option value="">-- Semua Bulan --</option>
+      <option>Januari</option>
+      <option>Februari</option>
+      <option>Maret</option>
+      <option>April</option>
+      <option>Mei</option>
+      <option>Juni</option>
+      <option>Juli</option>
+      <option>Agustus</option>
+      <option>September</option>
+      <option>Oktober</option>
+      <option>November</option>
+      <option>Desember</option>
+    </select>
+
+    <button onclick="loadData()">Tampilkan Daftar</button>
+    <button onclick="tambahData()">Tambah Laporan</button>
+    <button onclick="exportPDF()">Export PDF</button>
+
+    <!-- Tabel -->
+    <table id="tabel">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Nama Laporan</th>
+                <th>Batas Akhir</th>
+                <th>Status</th>
+                <th>Aksi</th>
+            </tr>
+        </thead>
+        <tbody></tbody>
+    </table>
+
+    <script>
+        async function checkAuth() {
+            let res = await fetch("/api/check-auth");
+            if (res.status !== 200) {
+                window.location.href = "/";
+            }
+        }
+
+        async function loadData() {
+            let tbody = document.querySelector("#tabel tbody");
+            tbody.innerHTML = "";
+
+            let tahun = document.getElementById("tahunFilter").value;
+
+            const bulanMap = {
+                Januari: 1,
+                Februari: 2,
+                Maret: 3,
+                April: 4,
+                Mei: 5,
+                Juni: 6,
+                Juli: 7,
+                Agustus: 8,
+                September: 9,
+                Oktober: 10,
+                November: 11,
+                Desember: 12,
+            };
+
+            let bulanText = document.getElementById("bulanFilter").value;
+            let bulan = bulanMap[bulanText];
+
+            if (!bulanText) {
+                bulan = "";
+            }
+
+            let url = `/api/laporan?tahun=${tahun}`;
+            if (bulan) {
+                url += `&bulan=${bulan}`;
+            }
+
+            let res = await fetch(url);
+
+            if (res.status === 401) {
+                alert("Session habis, login lagi!");
+                window.location.href = "/";
+                return;
+            }
+
+            let data = await res.json();
+
+            data.forEach((d, i) => {
+                let row = `<tr class="${d.status == "Sudah" ? "sudah" : ""}">
+            <td>${i + 1}</td>
+            <td>${d.nama}</td>
+            <td>${d.tgl}</td>
+            <td onclick="toggleStatus(${d.id}, '${d.status}')" style="cursor:pointer">
+                ${d.status}
+            </td>
+            <td>
+            <button onclick="editData(${d.id}, '${d.nama}', '${d.tgl}')">Edit</button>
+            <button onclick="hapusData(${d.id})">Hapus</button>
+        </td>
+        </tr>`;
+                tbody.innerHTML += row;
+            });
+        }
+
+        // ✅ FIX DISINI
+        async function tambahData() {
+            let nama = prompt("Nama Laporan:");
+            if (!nama) return;
+
+            let tgl = prompt("Tanggal (format: YYYY-MM-DD):");
+            if (!tgl) return;
+
+            // 🔥 parsing manual (fix bug)
+            let [year, month, day] = tgl.split("-");
+
+            let tahun = parseInt(year);
+            let bulan = parseInt(month);
+
+            await fetch("/api/laporan", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    tahun,
+                    bulan,
+                    nama,
+                    tgl,
+                    status: "Belum",
+                }),
+            });
+
+            loadData();
+        }
+
+        async function editData(id, namaLama, tglLama) {
+            let namaBaru = prompt("Edit Nama Laporan:", namaLama);
+            if (!namaBaru) return;
+
+            let tglBaru = prompt("Edit Tanggal:", tglLama);
+            if (!tglBaru) return;
+
+            let res = await fetch(`/api/laporan/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    nama: namaBaru,
+                    tgl: tglBaru,
+                }),
+            });
+
+            let result = await res.json();
+            console.log("EDIT RESULT:", result);
+
+            loadData();
+        }
+
+        async function toggleStatus(id, statusSekarang) {
+            let statusBaru = statusSekarang === "Belum" ? "Sudah" : "Belum";
+
+            await fetch(`/api/laporan/${id}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    status: statusBaru,
+                }),
+            });
+
+            loadData();
+        }
+
+        async function hapusData(id) {
+            if (!confirm("Yakin hapus?")) return;
+
+            await fetch(`/api/laporan/${id}`, {
+                method: "DELETE",
+            });
+
+            loadData();
+        }
+
+        async function logout() {
+            if (!confirm("Yakin mau logout?")) return;
+
+            await fetch("/api/logout", {
+                method: "POST",
+            });
+
+            window.location.href = "/";
+        }
+
+        let tahunSelect = document.getElementById("tahunFilter");
+        for (let y = 2024; y <= 2026; y++) {
+            let opt = document.createElement("option");
+            opt.value = y;
+            opt.text = y;
+            tahunSelect.add(opt);
+        }
+
+        function exportPDF() {
+            const tahun = document.getElementById("tahunFilter").value;
+            const bulan = document.getElementById("bulanFilter").value;
+            document.getElementById("printPeriode").textContent = bulan + " " + tahun;
+            window.print();
+        }
+
+        const now = new Date();
+
+        document.getElementById("tahunFilter").value = now.getFullYear();
+        document.getElementById("bulanFilter").value = "";
+
+        checkAuth();
+        loadData();
+    </script>
+</body>
+
+</html>
