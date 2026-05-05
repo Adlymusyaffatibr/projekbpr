@@ -10,7 +10,7 @@ const multer = require("multer");
 const { PDFDocument } = require("pdf-lib");
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = 3000;
 
 function sanitizeFilename(str) {
     return str.replace(/[^a-z0-9]/gi, "_").toLowerCase();
@@ -97,11 +97,7 @@ app.post("/api/login", async(req, res) => {
 
         const token = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
 
-        res.cookie("token", token, {
-            httpOnly: true,
-            secure: true,
-            sameSite: "none"
-        });
+        res.cookie("token", token, { httpOnly: true });
 
         res.json({
             success: true,
