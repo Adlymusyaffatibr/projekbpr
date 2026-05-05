@@ -38,11 +38,31 @@ app.use(
 );
 
 // Database connection
-const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "login_app",
+// const db = mysql.createConnection({
+//     host: "localhost",
+//     user: "root",
+//     password: "",
+//     database: "login_app",
+// });
+
+import mysql from 'mysql2/promise'; // atau require('mysql2/promise')
+import dotenv from 'dotenv';
+dotenv.config();
+
+const db = await mysql.createConnection({
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
+});
+
+db.connect((err) => {
+    if (err) {
+        console.error("Database connection failed:", err);
+        return;
+    }
+    console.log("✅ Connected to MySQL database");
 });
 
 db.connect((err) => {
@@ -525,6 +545,12 @@ app.get("/api/download-pdf/:filename", authenticateToken, (req, res) => {
     }
 });
 
-app.listen(PORT, () => {
-    console.log(`🚀 Server running on http://localhost:${PORT}`);
+// app.listen(PORT, () => {
+//     console.log(`🚀 Server running on http://localhost:${PORT}`);
+// });
+
+const PORT = process.env.PORT || 3000;
+
+app.listen(PORT, '0.0.0.0', () => {
+    console.log(`🚀 Server running on port ${PORT}`);
 });
