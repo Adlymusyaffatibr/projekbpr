@@ -10,7 +10,7 @@ const multer = require("multer");
 const { PDFDocument } = require("pdf-lib");
 
 const app = express();
-const PORT = 3000;
+const PORT = process.env.PORT || 3000;
 
 function sanitizeFilename(str) {
     return str.replace(/[^a-z0-9]/gi, "_").toLowerCase();
@@ -38,11 +38,19 @@ app.use(
 );
 
 // Database connection
+// const db = mysql.createConnection({
+//     host: "localhost",
+//     user: "root",
+//     password: "",
+//     database: "login_app",
+// });
+
 const db = mysql.createConnection({
-    host: "localhost",
-    user: "root",
-    password: "",
-    database: "login_app",
+    host: process.env.MYSQLHOST,
+    user: process.env.MYSQLUSER,
+    password: process.env.MYSQLPASSWORD,
+    database: process.env.MYSQLDATABASE,
+    port: process.env.MYSQLPORT
 });
 
 db.connect((err) => {
@@ -89,7 +97,11 @@ app.post("/api/login", async(req, res) => {
 
         const token = jwt.sign({ userId: user.id, username: user.username, role: user.role }, JWT_SECRET, { expiresIn: "1h" });
 
-        res.cookie("token", token, { httpOnly: true });
+        res.cookie("token", token, {
+            httpOnly: true,
+            secure: true,
+            sameSite: "none"
+        });
 
         res.json({
             success: true,
